@@ -1,68 +1,32 @@
-
-
-/*
-// bootstrap
-const exampleModal = document.getElementById('exampleModal')
-exampleModal.addEventListener('show.bs.modal', event => {
-  // Button that triggered the modal
-  const button = event.relatedTarget
-  // Extract info from data-bs-* attributes
-  const recipient = button.getAttribute('data-bs-whatever')
-  // If necessary, you could initiate an AJAX request here
-  // and then do the updating in a callback.
-  //
-  // Update the modal's content.
-  const modalTitle = exampleModal.querySelector('.modal-title')
-  const modalBodyInput = exampleModal.querySelector('.modal-body input')
-
-  modalTitle.textContent = `New message to ${recipient}`
-  modalBodyInput.value = recipient
-})
-*/
-
 const task_statuses = { new: 'New', progress: 'In Progress', complete: 'Complete' };
+
 const task_priorities = { 
 	low: { name: 'Low', class: 'bg-success' },
 	normal: { name: 'Normal', class: 'bg-primary' }, 
 	high: { name: 'High', class: 'bg-danger' }, 
 };
 
-const create_task_form = document.querySelector("#create_task_form");
-const update_priority_form = document.querySelector("#update_priority_form");
-const update_progress_form = document.querySelector("#update_progress_form");
+// modal for creating a new task
+const new_task_modal = document.querySelector('#newTaskModal');
+const new_task_modal_obj = new bootstrap.Modal(new_task_modal);
 
-const task_item_template = document.querySelector('#task_item_template');
-const task_table = document.querySelector('#task_table');
+// modal for updating task priority
+const priority_modal = document.querySelector('#priorityModal');
+const priority_modal_obj = new bootstrap.Modal(priority_modal);
 
-const exampleModal = document.querySelector('#exampleModal');
-const myModal = new bootstrap.Modal(exampleModal);
+// modal for updating task progress
+const progress_modal = document.querySelector('#progressModal');
+const progress_modal_obj = new bootstrap.Modal(progress_modal);
 
-
-
-const create_task_button = exampleModal.querySelector('button[name=create_task]');
-const task_subject_input = exampleModal.querySelector('#task_subject');
-const task_due_date_input = exampleModal.querySelector('#task_due_date');
-const select_priority = exampleModal.querySelector('#select_priority');
-
-const priorityModal = document.querySelector('#priorityModal');
-const priorityModalObj = new bootstrap.Modal(priorityModal);
-const change_priority = priorityModal.querySelector('#change_priority');
-const update_priority_button = priorityModal.querySelector('button[name=update_priority]');
-
-const progressModal = document.querySelector('#progressModal');
-const progressModalObj = new bootstrap.Modal(progressModal);
-const update_progress_button = progressModal.querySelector('button[name=update_progress]');
-
-const tasks_list = task_table.querySelector('tbody');
-
+// elements that are currently being selected and updated via modal
 let selected_priority_element = null;
 let selected_progress_element = null;
 
-
+// on page load do some preparations
 (function setup()
 {
 	for (const priority in task_priorities) {
-		{   // populate task creation selection with priority options
+		{   // populate task creation element with priority options
 			const option = document.createElement('option');
 			option.value = priority;
 			option.textContent = task_priorities[priority].name;
@@ -72,25 +36,35 @@ let selected_progress_element = null;
 				option.selected = true;
 			}
 
-			select_priority.appendChild(option);
+			new_task_modal.querySelector('#select_priority').appendChild(option);
 		}
 
-		{   // populate priority update selection with priority options
+		{   // populate priority update element with priority options
 			const option = document.createElement('option');
 			option.value = priority;
 			option.textContent = task_priorities[priority].name;
 
-			change_priority.appendChild(option);
+			priority_modal.querySelector('#change_priority').appendChild(option);
 		}
-		
 	}
 
-	task_due_date_input.valueAsDate = new Date();
-
-
+	preload_data();
 })();
 
-create_task_button.addEventListener('click', e => {
+/**
+ * Event Listeners
+ */
+
+// prepare and open modal for new task creation
+document.querySelector('#add_new_task_button').addEventListener('click', e => {
+	new_task_modal.querySelector('[name=task_due_date]').valueAsDate = new Date();
+	new_task_modal_obj.show();
+})
+
+// create new task and close modal
+new_task_modal.querySelector('[name=create_task]').addEventListener('click', e => {
+
+	const task_subject_input = new_task_modal.querySelector('[name=task_subject]');
 
 	if (task_subject_input.value == "")
 	{
@@ -98,40 +72,43 @@ create_task_button.addEventListener('click', e => {
 		return;
 	}
 
-	const form_data = new FormData(create_task_form);
+	const form_data = new FormData(document.querySelector("#create_task_form"));
 
     create_new_task_item(form_data.get('task_subject'), form_data.get('select_priority'), form_data.get('task_due_date'));
 
 	task_subject_input.classList.remove('border-danger');
 	task_subject_input.value = "";
 
-	myModal.hide();
+	new_task_modal_obj.hide();
 });
 
-update_priority_button.addEventListener('click', e => {
+// update task priority and close modal
+priority_modal.querySelector('[name=update_priority]').addEventListener('click', e => {
 
-	const form_data = new FormData(update_priority_form);
+	const form_data = new FormData(document.querySelector("#update_priority_form"));
 
 	update_priority_element(selected_priority_element, form_data.get('change_priority'));
 
 	update_modified_date(selected_priority_element);
 
-	priorityModalObj.hide();
+	priority_modal_obj.hide();
 });
 
-update_progress_button.addEventListener('click', e => {
+// update task progress and close modal
+progress_modal.querySelector('[name=update_progress]').addEventListener('click', e => {
 
-	const form_data = new FormData(update_progress_form);
+	const form_data = new FormData(document.querySelector("#update_progress_form"));
 
 	let new_progress = parseInt(form_data.get('new_progress'));
 	new_progress = clamp(new_progress, 0, 100);
 	
 	const progress_text = selected_progress_element.querySelector('[name=progress_text]');
 	progress_text.textContent = `${new_progress}%`;
+
 	const progress_bar = selected_progress_element.querySelector('[name=progress_bar]');
 	progress_bar.style.width = `${new_progress}%`;
 
-	progressModal.querySelector('input').value = "";
+	// update status when progress changes
 
 	let status_text = task_statuses.progress;
 	if (new_progress == 0)
@@ -148,21 +125,21 @@ update_progress_button.addEventListener('click', e => {
 
 	update_modified_date(selected_progress_element);
 
-	progressModalObj.hide();
+	progress_modal.querySelector('input').value = "";
+
+	progress_modal_obj.hide();
 });
 
+/**
+ * Functions
+ */
 
-function update_priority_element(element, priority_id)
-{
-	element.classList.remove(task_priorities.low.class, task_priorities.normal.class, task_priorities.high.class);
-	element.classList.add(task_priorities[priority_id].class);
-	element.textContent = task_priorities[priority_id].name;
-}
-
+// create new task and add it to the list
 function create_new_task_item(subject, priority, due_date)
 {
-    const new_task_item = task_item_template.content.cloneNode(true);
+    const new_task_item = document.querySelector('#task_item_template').content.cloneNode(true);
 
+	// checkbox column
 	const checkbox = new_task_item.querySelector('[name=checkbox]');
 	checkbox.addEventListener('click', e => {
 		const row = checkbox.closest('tr');
@@ -184,37 +161,51 @@ function create_new_task_item(subject, priority, due_date)
 		update_modified_date(checkbox);
 	});
 
-    const task_subject = new_task_item.querySelector('#task_subject');
-    const task_priority = new_task_item.querySelector('#task_priority');
+	// subject column
+	new_task_item.querySelector('[name=task_subject]').textContent = subject;
+
+	// priority column
+    const task_priority = new_task_item.querySelector('[name=task_priority]');
     task_priority.classList.add('bg-primary');
 	task_priority.addEventListener('click', e => {
-		priorityModalObj.show();
+		priority_modal_obj.show();
 		selected_priority_element = task_priority;
 	});
 	update_priority_element(task_priority, priority);
 
-	const progress_cell = new_task_item.querySelector('#progress_cell');
+	// date column
+	const task_due_date = new_task_item.querySelector('[name=task_due_date]');
+	task_due_date.textContent = due_date != "" ? new Date(due_date).toLocaleDateString("en-US") : "";
+
+	// status column
+	new_task_item.querySelector('[name=task_status]').textContent = task_statuses.new;
+
+	// progress column
+	const progress_cell = new_task_item.querySelector('[name=progress_cell]');
 	progress_cell.addEventListener('click', e => {
-		progressModalObj.show();
+		progress_modal_obj.show();
 		selected_progress_element = progress_cell;
 	});
 
-    const task_due_date = new_task_item.querySelector('#task_due_date');
-    const task_status = new_task_item.querySelector('[name=task_status]');
-
+	// remove task column
 	const remove_task = new_task_item.querySelector('[name=remove_task]');
 	remove_task.addEventListener('click', e => {
 		remove_task.parentElement.parentElement.remove();
 	});
 
-	console.log(due_date);
-    task_subject.textContent = subject;
-    task_due_date.textContent = new Date(due_date).toLocaleDateString("en-US");
-    task_status.textContent = task_statuses.new;
-
-    tasks_list.appendChild(new_task_item);
+	// add new task to the list
+    document.querySelector('#task_table tbody').appendChild(new_task_item);
 }
 
+// updates priority element styles and text
+function update_priority_element(element, priority_id)
+{
+	element.classList.remove(task_priorities.low.class, task_priorities.normal.class, task_priorities.high.class);
+	element.classList.add(task_priorities[priority_id].class);
+	element.textContent = task_priorities[priority_id].name;
+}
+
+// update time when task was last modified
 function update_modified_date(element)
 {
 	const row = element.closest('tr');
@@ -225,9 +216,51 @@ function update_modified_date(element)
 		day: 'numeric',
 		hour: '2-digit',
 		minute:'2-digit'
-	  });
+	});
 }
 
+// create some default tasks
+function preload_data()
+{
+	const data = [
+		{
+			subject: "Launch new website",
+			priority: "high",
+			due_date: "",
+		},
+		{
+			subject: "Corporate Rebranding",
+			priority: "low",
+			due_date: "",
+		},
+		{
+			subject: "Staff Training",
+			priority: "high",
+			due_date: "2018-04-06",
+		},
+		{
+			subject: "Collateral for Annual Expo",
+			priority: "high",
+			due_date: "2018-04-23",
+		},
+		{
+			subject: "Expand Marketing Team",
+			priority: "normal",
+			due_date: "2018-04-28",
+		},
+		{
+			subject: "New Product Launch",
+			priority: "low",
+			due_date: "",
+		},
+	];
+
+	for (const item of data) {
+		create_new_task_item(item.subject, item.priority, item.due_date);
+	}
+}
+
+// take a number and clamp it between min and max values
 function clamp(number, min, max) {
 	return Math.max(min, Math.min(number, max));
 }

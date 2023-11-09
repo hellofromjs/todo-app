@@ -14,147 +14,110 @@
 <body>
 	<div class="container">
 		<div class="row">
-
-			<div class="d-md-block">
-				<button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#exampleModal"
-					data-bs-whatever="@mdo">Add new task</button>
-			</div>
-
-			<div class="modal fade" id="exampleModal" tabindex="-1" aria-labelledby="exampleModalLabel"
-				aria-hidden="true">
-				<div class="modal-dialog">
-					<div class="modal-content">
-						<div class="modal-header">
-							<h1 class="modal-title fs-5" id="exampleModalLabel">Add New Task</h1>
-							<button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-						</div>
-						<div class="modal-body">
-							<form id="create_task_form">
-								<div class="mb-3">
-									<label for="task_subject" class="col-form-label">Subject:</label>
-									<input type="text" class="form-control border" id="task_subject"
-										name="task_subject">
-								</div>
-								<div class="mb-3">
-									<label for="select_priority" class="col-form-label">Priority:</label>
-									<select class="form-select" aria-label="Default select example" id="select_priority"
-										name="select_priority">
-									</select>
-								</div>
-								<div class="mb-3">
-									<label for="task_due_date" class="col-form-label">Due date:</label>
-									<input type="date" class="form-control" id="task_due_date" name="task_due_date">
-								</div>
-
-							</form>
-						</div>
-						<div class="modal-footer">
-							<button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
-							<button type="button" class="btn btn-primary" name="create_task">Add Task</button>
-						</div>
-					</div>
+			<div class="col">
+				<div class="d-md-block my-3">
+					<a href="#" role="button" class="btn btn-primary" id="add_new_task_button">Add new task</a>
 				</div>
 			</div>
-
-			<!-- Modal -->
-			<div class="modal fade" id="priorityModal" tabindex="-1" aria-labelledby="priorityModalLabel"
-				aria-hidden="true">
-				<div class="modal-dialog">
-					<div class="modal-content">
-						<div class="modal-header">
-							<h1 class="modal-title fs-5" id="priorityModalLabel">Change Priority</h1>
-							<button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-						</div>
-						<div class="modal-body">
-							<form id="update_priority_form">
-								<select class="form-select" aria-label="Default select example" id="change_priority"
-									name="change_priority">
-								</select>
-							</form>
-						</div>
-						<div class="modal-footer">
-							<button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
-							<button type="button" class="btn btn-primary" name="update_priority">Save changes</button>
-						</div>
-					</div>
-				</div>
-			</div>
-
-			<!-- Modal -->
-			<div class="modal fade" id="progressModal" tabindex="-1" aria-labelledby="progressModalLabel"
-				aria-hidden="true">
-				<div class="modal-dialog">
-					<div class="modal-content">
-						<div class="modal-header">
-							<h1 class="modal-title fs-5" id="progressModalLabel">Change Progress</h1>
-							<button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-						</div>
-						<div class="modal-body">
-							<form id="update_progress_form">
-								<input type="number" class="form-control" min="0" max="100" name="new_progress">
-							</form>
-						</div>
-						<div class="modal-footer">
-							<button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
-							<button type="button" class="btn btn-primary" name="update_progress">Save changes</button>
-						</div>
-					</div>
-				</div>
-			</div>
-
-
 		</div>
 		<div class="row">
 			<div class="col">
-
-
-				<table class="table align-middle" id="task_table">
-					<thead>
-						<tr>
-							<th scope="col"><i class="fa-solid fa-chart-simple"></i></th>
-							<th scope="col">Subject</th>
-							<th scope="col">Priority</th>
-							<th scope="col">Due date</th>
-							<th scope="col">Status</th>
-							<th scope="col">Percent complete</th>
-							<th scope="col">Modified on</th>
-							<th></th>
-						</tr>
-					</thead>
-					<tbody>
-						<tr>
-							<td scope="row">
-								<div class="checkbox-bg">
-									<input type="checkbox" name="checkbox">
-								</div>
-							</td>
-							<td><i class="fa-solid fa-check me-2 tick-grey"></i> Launch new website</td>
-							<td><span class="badge rounded-pill bg-primary">Normal</span></td>
-							<td>04/06/2018</td>
-							<td>Complete</td>
-							<td>
-								<div class="d-flex align-items-center gap-2">
-									<div>0%</div>
-									<div class="progress w-100" role="progressbar" aria-label="Success example"
-										aria-valuenow="25" aria-valuemin="0" aria-valuemax="100">
-										<div class="progress-bar bg-success" style="width: 25%"></div>
-									</div>
-								</div>
-							</td>
-							<td>04/05/2018 01:51 PM</td>
-							<td><a href="#" type="button" class="btn btn-danger btn-sm">Remove</a></td>
-						</tr>
-
-
-					</tbody>
-				</table>
-
+				<div class="table-responsive">
+					<table class="table align-middle" id="task_table">
+						<thead class="table-light">
+							<tr>
+								<th scope="col"><i class="fa-solid fa-chart-simple"></i></th>
+								<th scope="col">Subject</th>
+								<th scope="col">Priority</th>
+								<th scope="col">Due date</th>
+								<th scope="col">Status</th>
+								<th scope="col">Percent complete</th>
+								<th scope="col">Modified on</th>
+								<th></th>
+							</tr>
+						</thead>
+						<tbody></tbody>
+					</table>
+				</div>
 			</div>
 		</div>
-
 	</div>
-
-
+	<!-- New Task Modal -->
+	<div class="modal fade" id="newTaskModal" tabindex="-1" aria-labelledby="newTaskModalLabel" aria-hidden="true">
+		<div class="modal-dialog">
+			<div class="modal-content">
+				<div class="modal-header">
+					<h1 class="modal-title fs-5" id="newTaskModalLabel">Add New Task</h1>
+					<a href="#" role="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></a>
+				</div>
+				<div class="modal-body">
+					<form id="create_task_form">
+						<div class="mb-3">
+							<label for="task_subject" class="col-form-label">Subject:</label>
+							<input type="text" class="form-control border" id="task_subject" name="task_subject">
+						</div>
+						<div class="mb-3">
+							<label for="select_priority" class="col-form-label">Priority:</label>
+							<select class="form-select" aria-label="Default select example" id="select_priority"
+								name="select_priority">
+							</select>
+						</div>
+						<div class="mb-3">
+							<label for="task_due_date" class="col-form-label">Due date:</label>
+							<input type="date" class="form-control" id="task_due_date" name="task_due_date">
+						</div>
+					</form>
+				</div>
+				<div class="modal-footer">
+					<a href="#" role="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</a>
+					<a href="#" role="button" class="btn btn-primary" name="create_task">Add Task</a>
+				</div>
+			</div>
+		</div>
+	</div>
+	<!-- Priority Update Modal -->
+	<div class="modal fade" id="priorityModal" tabindex="-1" aria-labelledby="priorityModalLabel" aria-hidden="true">
+		<div class="modal-dialog">
+			<div class="modal-content">
+				<div class="modal-header">
+					<h1 class="modal-title fs-5" id="priorityModalLabel">Change Priority</h1>
+					<a href="#" role="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></a>
+				</div>
+				<div class="modal-body">
+					<form id="update_priority_form">
+						<select class="form-select" aria-label="Default select example" id="change_priority"
+							name="change_priority">
+						</select>
+					</form>
+				</div>
+				<div class="modal-footer">
+					<a href="#" role="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</a>
+					<a href="#" role="button" class="btn btn-primary" name="update_priority">Save changes</a>
+				</div>
+			</div>
+		</div>
+	</div>
+	<!-- Progress Update Modal -->
+	<div class="modal fade" id="progressModal" tabindex="-1" aria-labelledby="progressModalLabel" aria-hidden="true">
+		<div class="modal-dialog">
+			<div class="modal-content">
+				<div class="modal-header">
+					<h1 class="modal-title fs-5" id="progressModalLabel">Change Progress</h1>
+					<a href="#" role="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></a>
+				</div>
+				<div class="modal-body">
+					<form id="update_progress_form">
+						<input type="number" class="form-control" min="0" max="100" name="new_progress">
+					</form>
+				</div>
+				<div class="modal-footer">
+					<a href="#" role="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</a>
+					<a href="#" role="button" class="btn btn-primary" name="update_progress">Save changes</a>
+				</div>
+			</div>
+		</div>
+	</div>
+	<!-- Task List Item Template -->
 	<template id="task_item_template">
 		<tr>
 			<td scope="row">
@@ -162,13 +125,15 @@
 					<input type="checkbox" name="checkbox">
 				</div>
 			</td>
-			<td name="subject"><i class="fa-solid fa-check me-2 tick-grey"></i> <span id="task_subject">Launch new
-					website</span></td>
-			<td><span class="badge rounded-pill" id="task_priority">Normal</span></td>
-			<td id="task_due_date">04/06/2018</td>
+			<td name="subject">
+				<i class="fa-solid fa-check me-2 tick-grey"></i>
+				<span name="task_subject">Subject</span>
+			</td>
+			<td><span class="badge rounded-pill" name="task_priority">Normal</span></td>
+			<td name="task_due_date">04/06/2018</td>
 			<td name="task_status">Complete</td>
 			<td>
-				<div class="d-flex align-items-center gap-2" id="progress_cell">
+				<div class="d-flex align-items-center gap-2" name="progress_cell">
 					<div name="progress_text">0%</div>
 					<div class="progress w-100" role="progressbar" aria-label="Success example" aria-valuenow="0"
 						aria-valuemin="0" aria-valuemax="100">
@@ -176,11 +141,10 @@
 					</div>
 				</div>
 			</td>
-			<td name="last_modified"></td> <!-- 04/05/2018 01:51 PM -->
-			<td><a href="#" type="button" class="btn btn-danger btn-sm" name="remove_task">Remove</a></td>
+			<td name="last_modified"></td>
+			<td><a href="#" role="button" class="btn btn-danger btn-sm" name="remove_task">Remove</a></td>
 		</tr>
 	</template>
-
 </body>
 
 </html>
