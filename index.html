@@ -32,7 +32,18 @@
                     </div>
                     <div class="mb-3">
                         <label for="task-priority" class="col-form-label">Priority:</label>
-                        <input type="text" class="form-control" id="task-priority">
+
+                        <div class="dropdown">
+                            <a class="btn btn-secondary dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                                Dropdown link
+                            </a>
+                            
+                            <ul class="dropdown-menu" id="task-priority">
+                                <li><a class="dropdown-item" href="#">Action</a></li>
+                                <li><a class="dropdown-item" href="#">Another action</a></li>
+                                <li><a class="dropdown-item" href="#">Something else here</a></li>
+                            </ul>
+                        </div>
                     </div>
                     <div class="mb-3">
                         <label for="task-due-date" class="col-form-label">Due date:</label>
