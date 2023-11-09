@@ -11855,5 +11855,70 @@ textarea.form-control-lg {
     display: none !important;
   }
 }
+input[type=checkbox] {
+  appearance: none;
+  height: 20px;
+  width: 20px;
+  background-color: white;
+  border-radius: 5px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  outline: none;
+}
+
+input[type=checkbox]:after {
+  font-family: "Font Awesome 5 Free";
+  font-weight: 900;
+  content: "\f00c";
+  font-size: 16px;
+  color: green;
+  display: none;
+}
+
+input[type=checkbox]:hover {
+  background-color: #e3e3e3;
+}
+
+input[type=checkbox]:checked {
+  background-color: white;
+}
+
+input[type=checkbox]:checked:after {
+  display: block;
+}
+
+.checkbox-bg {
+  width: 33px;
+  height: 33px;
+  background-color: green;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+tr td:first-child {
+  width: 0;
+}
+
+.fa-check {
+  font-size: 30px;
+}
+
+.tick-grey {
+  color: #d1d1d1;
+}
+
+.tick-green {
+  color: green;
+}
+
+.crossed {
+  color: rgb(187, 187, 187);
+  text-decoration: line-through;
+  text-decoration-thickness: 1px;
+}
 
 /*# sourceMappingURL=style.css.map */

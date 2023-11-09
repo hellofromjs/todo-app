@@ -27,5 +27,33 @@
 // @import "../node_modules/bootstrap/scss/utilities/api";
 
 // // 8. Add additional custom code here
+// @import "../node_modules/bootstrap/scss/tables";
+// @import "../node_modules/bootstrap/scss/modal";
+// @import "../node_modules/bootstrap/scss/buttons";
+// @import "../node_modules/bootstrap/scss/badge";
 
 @import "../node_modules/bootstrap/scss/bootstrap";
+
+@import "./components/checkbox";
+
+tr td:first-child {
+	width: 0;
+}
+
+.fa-check {
+	font-size: 30px;
+}
+
+.tick-grey {
+	color: #d1d1d1;
+}
+
+.tick-green {
+	color: green;
+}
+
+.crossed {
+	color: rgb(187, 187, 187);
+	text-decoration: line-through;
+	text-decoration-thickness: 1px;
+}
