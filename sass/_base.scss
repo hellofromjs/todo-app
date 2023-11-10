@@ -1,0 +1,36 @@
+tr {
+	td:first-child, td:nth-child(2) {
+		width: 0;
+	}
+}
+
+.fa-check {
+	font-size: 30px;
+}
+
+.tick {
+	&-grey {
+		color: #d1d1d1;
+	}
+	&-green {
+		color: green;
+	}
+}
+
+.crossed {
+	color: rgb(187, 187, 187);
+	text-decoration: line-through;
+	text-decoration-thickness: 1px;
+}
+
+th {
+	border: var(--bs-border-width) solid var(--bs-border-color);
+}
+
+.badge {
+	width: 85px;
+}
+
+.progress_text {
+	width: 50px;
+}

@@ -1,3 +1,5 @@
+"use strict";
+
 const task_statuses = { new: 'New', progress: 'In Progress', complete: 'Complete' };
 
 const task_priorities = { 
@@ -23,7 +25,7 @@ let selected_priority_element = null;
 let selected_progress_element = null;
 
 // on page load do some preparations
-(function setup()
+void function setup()
 {
 	for (const priority in task_priorities) {
 		{   // populate task creation element with priority options
@@ -49,7 +51,7 @@ let selected_progress_element = null;
 	}
 
 	preload_data();
-})();
+}();
 
 /**
  * Event Listeners
@@ -74,7 +76,7 @@ new_task_modal.querySelector('[name=create_task]').addEventListener('click', e =
 
 	const form_data = new FormData(document.querySelector("#create_task_form"));
 
-    create_new_task_item(form_data.get('task_subject'), form_data.get('select_priority'), form_data.get('task_due_date'));
+	create_new_task_item(form_data.get('task_subject'), form_data.get('select_priority'), form_data.get('task_due_date'));
 
 	task_subject_input.classList.remove('border-danger');
 	task_subject_input.value = "";
@@ -137,15 +139,15 @@ progress_modal.querySelector('[name=update_progress]').addEventListener('click',
 // create new task and add it to the list
 function create_new_task_item(subject, priority, due_date)
 {
-    const new_task_item = document.querySelector('#task_item_template').content.cloneNode(true);
+	const new_task_item = document.querySelector('#task_item_template').content.cloneNode(true);
 
 	// checkbox column
 	const checkbox = new_task_item.querySelector('[name=checkbox]');
 	checkbox.addEventListener('click', e => {
 		const row = checkbox.closest('tr');
-		const cubject_cell = row.querySelector('[name=subject]');
-		const tick = cubject_cell.querySelector('i');
-		const subject = cubject_cell.querySelector('span');
+		const subject_cell = row.querySelector('[name=subject]');
+		const tick = row.querySelector('[name=tick]');
+		const subject = subject_cell.querySelector('span');
 	
 		if (checkbox.checked == true)
 		{
@@ -165,8 +167,8 @@ function create_new_task_item(subject, priority, due_date)
 	new_task_item.querySelector('[name=task_subject]').textContent = subject;
 
 	// priority column
-    const task_priority = new_task_item.querySelector('[name=task_priority]');
-    task_priority.classList.add('bg-primary');
+	const task_priority = new_task_item.querySelector('[name=task_priority]');
+	task_priority.classList.add(task_priorities[priority].class);
 	task_priority.addEventListener('click', e => {
 		priority_modal_obj.show();
 		selected_priority_element = task_priority;
@@ -190,11 +192,11 @@ function create_new_task_item(subject, priority, due_date)
 	// remove task column
 	const remove_task = new_task_item.querySelector('[name=remove_task]');
 	remove_task.addEventListener('click', e => {
-		remove_task.parentElement.parentElement.remove();
+		remove_task.closest('tr').remove();
 	});
 
 	// add new task to the list
-    document.querySelector('#task_table tbody').appendChild(new_task_item);
+	document.querySelector('#task_table tbody').appendChild(new_task_item);
 }
 
 // updates priority element styles and text

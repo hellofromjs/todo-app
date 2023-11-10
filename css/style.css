@@ -11855,6 +11855,39 @@ textarea.form-control-lg {
     display: none !important;
   }
 }
+tr td:first-child, tr td:nth-child(2) {
+  width: 0;
+}
+
+.fa-check {
+  font-size: 30px;
+}
+
+.tick-grey {
+  color: #d1d1d1;
+}
+.tick-green {
+  color: green;
+}
+
+.crossed {
+  color: rgb(187, 187, 187);
+  text-decoration: line-through;
+  text-decoration-thickness: 1px;
+}
+
+th {
+  border: var(--bs-border-width) solid var(--bs-border-color);
+}
+
+.badge {
+  width: 85px;
+}
+
+.progress_text {
+  width: 50px;
+}
+
 input[type=checkbox] {
   appearance: none;
   height: 20px;
@@ -11897,32 +11930,6 @@ input[type=checkbox]:checked:after {
   display: flex;
   align-items: center;
   justify-content: center;
-}
-
-tr td:first-child {
-  width: 0;
-}
-
-.fa-check {
-  font-size: 30px;
-}
-
-.tick-grey {
-  color: #d1d1d1;
-}
-
-.tick-green {
-  color: green;
-}
-
-.crossed {
-  color: rgb(187, 187, 187);
-  text-decoration: line-through;
-  text-decoration-thickness: 1px;
-}
-
-th {
-  border: var(--bs-border-width) solid var(--bs-border-color);
 }
 
 /*# sourceMappingURL=style.css.map */
