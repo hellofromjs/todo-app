@@ -11855,6 +11855,10 @@ textarea.form-control-lg {
     display: none !important;
   }
 }
+th {
+  border: var(--bs-border-width) solid var(--bs-border-color);
+}
+
 tr td:first-child, tr td:nth-child(2) {
   width: 0;
 }
@@ -11876,12 +11880,14 @@ tr td:first-child, tr td:nth-child(2) {
   text-decoration-thickness: 1px;
 }
 
-th {
-  border: var(--bs-border-width) solid var(--bs-border-color);
-}
-
 .badge {
   width: 85px;
+}
+
+.progress {
+  background-color: initial;
+  border: 2px solid #f0f0f0;
+  border-radius: var(--bs-border-radius-pill);
 }
 
 .progress_text {

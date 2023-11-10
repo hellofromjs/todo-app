@@ -2,10 +2,10 @@
 
 const task_statuses = { new: 'New', progress: 'In Progress', complete: 'Complete' };
 
-const task_priorities = { 
+const task_priorities = {
 	low: { name: 'Low', class: 'bg-success' },
-	normal: { name: 'Normal', class: 'bg-primary' }, 
-	high: { name: 'High', class: 'bg-danger' }, 
+	normal: { name: 'Normal', class: 'bg-primary' },
+	high: { name: 'High', class: 'bg-danger' },
 };
 
 // modal for creating a new task
@@ -25,16 +25,14 @@ let selected_priority_element = null;
 let selected_progress_element = null;
 
 // on page load do some preparations
-void function setup()
-{
+void function setup() {
 	for (const priority in task_priorities) {
 		{   // populate task creation element with priority options
 			const option = document.createElement('option');
 			option.value = priority;
 			option.textContent = task_priorities[priority].name;
-		
-			if (priority == 'normal')
-			{
+
+			if (priority == 'normal') {
 				option.selected = true;
 			}
 
@@ -68,8 +66,7 @@ new_task_modal.querySelector('[name=create_task]').addEventListener('click', e =
 
 	const task_subject_input = new_task_modal.querySelector('[name=task_subject]');
 
-	if (task_subject_input.value == "")
-	{
+	if (task_subject_input.value == "") {
 		task_subject_input.classList.add('border-danger');
 		return;
 	}
@@ -103,7 +100,7 @@ progress_modal.querySelector('[name=update_progress]').addEventListener('click',
 
 	let new_progress = parseInt(form_data.get('new_progress'));
 	new_progress = clamp(new_progress, 0, 100);
-	
+
 	const progress_text = selected_progress_element.querySelector('[name=progress_text]');
 	progress_text.textContent = `${new_progress}%`;
 
@@ -113,11 +110,9 @@ progress_modal.querySelector('[name=update_progress]').addEventListener('click',
 	// update status when progress changes
 
 	let status_text = task_statuses.progress;
-	if (new_progress == 0)
-	{
+	if (new_progress == 0) {
 		status_text = task_statuses.new;
-	} else if (new_progress == 100)
-	{
+	} else if (new_progress == 100) {
 		status_text = task_statuses.complete;
 	}
 
@@ -137,8 +132,7 @@ progress_modal.querySelector('[name=update_progress]').addEventListener('click',
  */
 
 // create new task and add it to the list
-function create_new_task_item(subject, priority, due_date)
-{
+function create_new_task_item(subject, priority, due_date) {
 	const new_task_item = document.querySelector('#task_item_template').content.cloneNode(true);
 
 	// checkbox column
@@ -148,9 +142,8 @@ function create_new_task_item(subject, priority, due_date)
 		const subject_cell = row.querySelector('[name=subject]');
 		const tick = row.querySelector('[name=tick]');
 		const subject = subject_cell.querySelector('span');
-	
-		if (checkbox.checked == true)
-		{
+
+		if (checkbox.checked == true) {
 			tick.classList.add('tick-green');
 			tick.classList.remove('tick-grey');
 			subject.classList.add('crossed');
@@ -159,7 +152,7 @@ function create_new_task_item(subject, priority, due_date)
 			tick.classList.remove('tick-green');
 			subject.classList.remove('crossed');
 		}
-		
+
 		update_modified_date(checkbox);
 	});
 
@@ -200,16 +193,14 @@ function create_new_task_item(subject, priority, due_date)
 }
 
 // updates priority element styles and text
-function update_priority_element(element, priority_id)
-{
+function update_priority_element(element, priority_id) {
 	element.classList.remove(task_priorities.low.class, task_priorities.normal.class, task_priorities.high.class);
 	element.classList.add(task_priorities[priority_id].class);
 	element.textContent = task_priorities[priority_id].name;
 }
 
 // update time when task was last modified
-function update_modified_date(element)
-{
+function update_modified_date(element) {
 	const row = element.closest('tr');
 	const last_modified = row.querySelector('[name=last_modified]');
 	last_modified.textContent = new Date().toLocaleString("en-US", {
@@ -217,13 +208,12 @@ function update_modified_date(element)
 		month: 'numeric',
 		day: 'numeric',
 		hour: '2-digit',
-		minute:'2-digit'
+		minute: '2-digit'
 	});
 }
 
 // create some default tasks
-function preload_data()
-{
+function preload_data() {
 	const data = [
 		{
 			subject: "Launch new website",
