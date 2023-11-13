@@ -8,6 +8,16 @@ const task_priorities = {
 	high: { name: 'High', class: 'bg-danger' },
 };
 
+let new_task_example = {
+	id: null,
+	checked: null,
+	subject: null,
+	priority: null,
+	due_date: null,
+	progress: 0,
+	modified_date: null,
+}
+
 // modal for creating a new task
 const new_task_modal = document.querySelector('#newTaskModal');
 const new_task_modal_obj = new bootstrap.Modal(new_task_modal);
@@ -72,8 +82,20 @@ new_task_modal.querySelector('[name=create_task]').addEventListener('click', e =
 	}
 
 	const form_data = new FormData(document.querySelector("#create_task_form"));
+	let task_subject = form_data.get('task_subject');
+	let select_priority = form_data.get('select_priority');
+	let task_due_date = form_data.get('task_due_date');
+	let task_id = random_id();
 
-	create_new_task_item(form_data.get('task_subject'), form_data.get('select_priority'), form_data.get('task_due_date'));
+	add_to_localstorage(task_id, task_subject, select_priority, task_due_date);
+
+	let new_task = structuredClone(new_task_example);
+	new_task.id = task_id;
+	new_task.subject = task_subject;
+	new_task.priority = select_priority;
+	new_task.due_date = task_due_date;
+
+	render_new_task_item(new_task);
 
 	task_subject_input.classList.remove('border-danger');
 	task_subject_input.value = "";
@@ -85,8 +107,12 @@ new_task_modal.querySelector('[name=create_task]').addEventListener('click', e =
 priority_modal.querySelector('[name=update_priority]').addEventListener('click', e => {
 
 	const form_data = new FormData(document.querySelector("#update_priority_form"));
+	const priority_id = form_data.get('change_priority');
+	update_priority_element(selected_priority_element, priority_id);
 
-	update_priority_element(selected_priority_element, form_data.get('change_priority'));
+	const row = selected_priority_element.closest('tr');
+	console.log(row.dataset.id);
+	update_priority_localStorage(row.dataset.id, priority_id);
 
 	update_modified_date(selected_priority_element);
 
@@ -101,6 +127,25 @@ progress_modal.querySelector('[name=update_progress]').addEventListener('click',
 	let new_progress = parseInt(form_data.get('new_progress'));
 	new_progress = clamp(new_progress, 0, 100);
 
+	const row = selected_progress_element.closest('tr');
+
+	update_progress_visual(row, selected_progress_element, new_progress);
+
+	update_progress_localstorage(row.dataset.id, new_progress);
+
+	update_modified_date(selected_progress_element);
+
+	progress_modal.querySelector('input').value = "";
+
+	progress_modal_obj.hide();
+});
+
+/**
+ * Functions
+ */
+
+function update_progress_visual(row, selected_progress_element, new_progress)
+{
 	const progress_text = selected_progress_element.querySelector('[name=progress_text]');
 	progress_text.textContent = `${new_progress}%`;
 
@@ -116,42 +161,154 @@ progress_modal.querySelector('[name=update_progress]').addEventListener('click',
 		status_text = task_statuses.complete;
 	}
 
-	const row = progress_text.closest('tr');
+	
 	const task_status = row.querySelector('[name=task_status]');
 	task_status.textContent = status_text;
+}
 
-	update_modified_date(selected_progress_element);
+function remove_from_localstorage(id)
+{
+	let tasks = localStorage.getItem('tasks');
+	tasks = JSON.parse(tasks);
 
-	progress_modal.querySelector('input').value = "";
+	const result = tasks.filter((task) => task.id != id);
 
-	progress_modal_obj.hide();
-});
+	localStorage.setItem('tasks', JSON.stringify(result));
+}
 
-/**
- * Functions
- */
+function add_to_localstorage(id, subject, priority, due_date)
+{
+	let tasks = localStorage.getItem('tasks');
+
+	if (tasks == null)
+	{
+		tasks = [];
+	} else {
+		tasks = JSON.parse(tasks);
+	}
+
+	let new_task = structuredClone(new_task_example);
+	new_task.id = id;
+	new_task.subject = subject;
+	new_task.priority = priority;
+	new_task.due_date = due_date;
+
+	tasks.push(new_task);
+
+	localStorage.setItem('tasks', JSON.stringify(tasks));
+}
+
+function update_checkbox_localstorage(id, checkbox_status)
+{
+	let tasks = localStorage.getItem('tasks');
+	tasks = JSON.parse(tasks);
+
+	for (const task of tasks) {
+		if (task.id == id)
+		{
+			task.checked = checkbox_status;
+		}
+	}
+
+	localStorage.setItem('tasks', JSON.stringify(tasks));
+}
+
+function update_priority_localStorage(id, priority)
+{
+	let tasks = localStorage.getItem('tasks');
+	tasks = JSON.parse(tasks);
+
+	for (const task of tasks) {
+		if (task.id == parseInt(id))
+		{
+			task.priority = priority;
+		}
+	}
+
+	localStorage.setItem('tasks', JSON.stringify(tasks));
+}
+
+function update_progress_localstorage(id, new_progress)
+{
+	let tasks = localStorage.getItem('tasks');
+	tasks = JSON.parse(tasks);
+
+	for (const task of tasks) {
+		if (task.id == parseInt(id))
+		{
+			task.progress = new_progress;
+		}
+	}
+
+	localStorage.setItem('tasks', JSON.stringify(tasks));
+}
+
+function update_modified_localstorage(id, modified_text)
+{
+	let tasks = localStorage.getItem('tasks');
+	tasks = JSON.parse(tasks);
+
+	for (const task of tasks) {
+		if (task.id == parseInt(id))
+		{
+			task.modified_date = modified_text;
+		}
+	}
+
+	localStorage.setItem('tasks', JSON.stringify(tasks));
+}
+
+function random_id(){
+	return Math.floor(Math.random() * 99999999);
+}
+
+function render_new_task_items() {
+	let tasks = localStorage.getItem('tasks');
+
+	if (tasks != null) {
+		tasks = JSON.parse(tasks);
+
+		for (const task of tasks) {
+			render_new_task_item(task);
+		}
+	}
+}
+
+function update_visuals_on_check(checkbox, is_checked, tick, subject)
+{
+	if (is_checked == true) {
+		tick.classList.add('tick-green');
+		tick.classList.remove('tick-grey');
+		subject.classList.add('crossed');
+		checkbox.checked = true;
+	} else {
+		tick.classList.add('tick-grey');
+		tick.classList.remove('tick-green');
+		subject.classList.remove('crossed');
+		checkbox.checked = false;
+	}
+}
 
 // create new task and add it to the list
-function create_new_task_item(subject, priority, due_date) {
-	const new_task_item = document.querySelector('#task_item_template').content.cloneNode(true);
+function render_new_task_item({ id, subject, priority, due_date, checked, progress, modified_date }) {
+
+	const new_task_item = document.querySelector('#task_item_template').content.firstElementChild.cloneNode(true);
+	
+	new_task_item.dataset.id = id;
 
 	// checkbox column
 	const checkbox = new_task_item.querySelector('[name=checkbox]');
-	checkbox.addEventListener('click', e => {
-		const row = checkbox.closest('tr');
-		const subject_cell = row.querySelector('[name=subject]');
-		const tick = row.querySelector('[name=tick]');
-		const subject = subject_cell.querySelector('span');
+	const row = checkbox.closest('tr');
+	const subject_cell = row.querySelector('[name=subject]');
+	const tick = row.querySelector('[name=tick]');
+	const subject_el = subject_cell.querySelector('span');
+	let is_checked = checked == null ? checkbox.checked : checked;
+	update_visuals_on_check(checkbox, is_checked, tick, subject_el);
 
-		if (checkbox.checked == true) {
-			tick.classList.add('tick-green');
-			tick.classList.remove('tick-grey');
-			subject.classList.add('crossed');
-		} else {
-			tick.classList.add('tick-grey');
-			tick.classList.remove('tick-green');
-			subject.classList.remove('crossed');
-		}
+	checkbox.addEventListener('click', e => {
+		update_visuals_on_check(checkbox, checkbox.checked, tick, subject_el);
+
+		update_checkbox_localstorage(row.dataset.id, checkbox.checked);
 
 		update_modified_date(checkbox);
 	});
@@ -177,15 +334,21 @@ function create_new_task_item(subject, priority, due_date) {
 
 	// progress column
 	const progress_cell = new_task_item.querySelector('[name=progress_cell]');
+	update_progress_visual(row, progress_cell, progress);
 	progress_cell.addEventListener('click', e => {
 		progress_modal_obj.show();
 		selected_progress_element = progress_cell;
 	});
 
+	const last_modified = new_task_item.querySelector('[name=last_modified]');
+	last_modified.textContent = modified_date;
+
 	// remove task column
 	const remove_task = new_task_item.querySelector('[name=remove_task]');
 	remove_task.addEventListener('click', e => {
-		remove_task.closest('tr').remove();
+		const task_row = remove_task.closest('tr');
+		remove_from_localstorage(task_row.dataset.id);
+		task_row.remove();
 	});
 
 	// add new task to the list
@@ -203,53 +366,77 @@ function update_priority_element(element, priority_id) {
 function update_modified_date(element) {
 	const row = element.closest('tr');
 	const last_modified = row.querySelector('[name=last_modified]');
-	last_modified.textContent = new Date().toLocaleString("en-US", {
+	let modified_text = new Date().toLocaleString("en-US", {
 		year: 'numeric',
 		month: 'numeric',
 		day: 'numeric',
 		hour: '2-digit',
 		minute: '2-digit'
 	});
+	last_modified.textContent = modified_text;
+
+	update_modified_localstorage(row.dataset.id, modified_text);
 }
 
 // create some default tasks
 function preload_data() {
+
+	let tasks = localStorage.getItem('tasks');
+	let should_add = false;
+
+	// if localStorage is empty, add to it
+	if (tasks == null || tasks == "[]")
+	{
+		should_add = true;
+	}
+
 	const data = [
 		{
+			id: random_id(),
 			subject: "Launch new website",
 			priority: "high",
 			due_date: "",
 		},
 		{
+			id: random_id(),
 			subject: "Corporate Rebranding",
 			priority: "low",
 			due_date: "",
 		},
 		{
+			id: random_id(),
 			subject: "Staff Training",
 			priority: "high",
 			due_date: "2018-04-06",
 		},
 		{
+			id: random_id(),
 			subject: "Collateral for Annual Expo",
 			priority: "high",
 			due_date: "2018-04-23",
 		},
 		{
+			id: random_id(),
 			subject: "Expand Marketing Team",
 			priority: "normal",
 			due_date: "2018-04-28",
 		},
 		{
+			id: random_id(),
 			subject: "New Product Launch",
 			priority: "low",
 			due_date: "",
 		},
 	];
 
-	for (const item of data) {
-		create_new_task_item(item.subject, item.priority, item.due_date);
+	if (should_add == true)
+	{
+		for (const item of data) {
+			add_to_localstorage(item.id, item.subject, item.priority, item.due_date);
+		}
 	}
+
+	render_new_task_items();
 }
 
 // take a number and clamp it between min and max values
