@@ -18,6 +18,8 @@ let new_task_example = {
 	modified_date: null,
 }
 
+let tasksJSON = [];
+
 // modal for creating a new task
 const new_task_modal = document.querySelector('#newTaskModal');
 const new_task_modal_obj = new bootstrap.Modal(new_task_modal);
@@ -58,20 +60,26 @@ void function setup() {
 		}
 	}
 
-	preload_data();
+	const tasks = localStorage.getItem('tasks');
+
+	if (tasks != null) {
+		tasksJSON = JSON.parse(tasks);
+	}
+
+	render_tasks();
 }();
 
 /**
  * Event Listeners
  */
 
-// prepare and open modal for new task creation
+// show modal for new task creation
 document.querySelector('#add_new_task_button').addEventListener('click', e => {
 	new_task_modal.querySelector('[name=task_due_date]').valueAsDate = new Date();
 	new_task_modal_obj.show();
 })
 
-// create new task and close modal
+// create new task modal
 new_task_modal.querySelector('[name=create_task]').addEventListener('click', e => {
 
 	const task_subject_input = new_task_modal.querySelector('[name=task_subject]');
@@ -87,15 +95,9 @@ new_task_modal.querySelector('[name=create_task]').addEventListener('click', e =
 	let task_due_date = form_data.get('task_due_date');
 	let task_id = random_id();
 
-	add_to_localstorage(task_id, task_subject, select_priority, task_due_date);
+	create_task_localstorage(task_id, task_subject, select_priority, task_due_date);
 
-	let new_task = structuredClone(new_task_example);
-	new_task.id = task_id;
-	new_task.subject = task_subject;
-	new_task.priority = select_priority;
-	new_task.due_date = task_due_date;
-
-	render_new_task_item(new_task);
+	render_task({ ...new_task_example, id: task_id, subject: task_subject, priority: select_priority, due_date: task_due_date });
 
 	task_subject_input.classList.remove('border-danger');
 	task_subject_input.value = "";
@@ -103,23 +105,23 @@ new_task_modal.querySelector('[name=create_task]').addEventListener('click', e =
 	new_task_modal_obj.hide();
 });
 
-// update task priority and close modal
+// task priority update modal
 priority_modal.querySelector('[name=update_priority]').addEventListener('click', e => {
 
 	const form_data = new FormData(document.querySelector("#update_priority_form"));
 	const priority_id = form_data.get('change_priority');
-	update_priority_element(selected_priority_element, priority_id);
-
 	const row = selected_priority_element.closest('tr');
-	console.log(row.dataset.id);
+
 	update_priority_localStorage(row.dataset.id, priority_id);
+	
+	render_priority_element(selected_priority_element, priority_id);
 
 	update_modified_date(selected_priority_element);
 
 	priority_modal_obj.hide();
 });
 
-// update task progress and close modal
+// task progress update modal
 progress_modal.querySelector('[name=update_progress]').addEventListener('click', e => {
 
 	const form_data = new FormData(document.querySelector("#update_progress_form"));
@@ -129,7 +131,7 @@ progress_modal.querySelector('[name=update_progress]').addEventListener('click',
 
 	const row = selected_progress_element.closest('tr');
 
-	update_progress_visual(row, selected_progress_element, new_progress);
+	render_progress_element(row, selected_progress_element, new_progress);
 
 	update_progress_localstorage(row.dataset.id, new_progress);
 
@@ -141,11 +143,73 @@ progress_modal.querySelector('[name=update_progress]').addEventListener('click',
 });
 
 /**
- * Functions
+ *  LocalStorage Functions
  */
 
-function update_progress_visual(row, selected_progress_element, new_progress)
-{
+function remove_task_from_localstorage(id) {
+	tasksJSON = tasksJSON.filter((task) => task.id != id);
+
+	localStorage.setItem('tasks', JSON.stringify(tasksJSON));
+}
+
+function create_task_localstorage(id, subject, priority, due_date) {
+	let new_task = { ...new_task_example };
+	new_task.id = id;
+	new_task.subject = subject;
+	new_task.priority = priority;
+	new_task.due_date = due_date;
+
+	tasksJSON.push(new_task);
+
+	localStorage.setItem('tasks', JSON.stringify(tasksJSON));
+}
+
+function update_checkbox_localstorage(id, checkbox_status) {
+	for (const task of tasksJSON) {
+		if (task.id == parseInt(id)) {
+			task.checked = checkbox_status;
+		}
+	}
+
+	localStorage.setItem('tasks', JSON.stringify(tasksJSON));
+}
+
+function update_priority_localStorage(id, priority) {
+	for (const task of tasksJSON) {
+		if (task.id == parseInt(id)) {
+			task.priority = priority;
+		}
+	}
+
+	localStorage.setItem('tasks', JSON.stringify(tasksJSON));
+}
+
+function update_progress_localstorage(id, new_progress) {
+	for (const task of tasksJSON) {
+		if (task.id == parseInt(id)) {
+			task.progress = new_progress;
+		}
+	}
+
+	localStorage.setItem('tasks', JSON.stringify(tasksJSON));
+}
+
+function update_modified_localstorage(id, modified_text) {
+	for (const task of tasksJSON) {
+		if (task.id == parseInt(id)) {
+			task.modified_date = modified_text;
+		}
+	}
+
+	localStorage.setItem('tasks', JSON.stringify(tasksJSON));
+}
+
+/**
+ * Update DOM Visuals Functions
+ */
+
+// update progress DOM visuals
+function render_progress_element(row, selected_progress_element, new_progress) {
 	const progress_text = selected_progress_element.querySelector('[name=progress_text]');
 	progress_text.textContent = `${new_progress}%`;
 
@@ -161,121 +225,11 @@ function update_progress_visual(row, selected_progress_element, new_progress)
 		status_text = task_statuses.complete;
 	}
 
-	
 	const task_status = row.querySelector('[name=task_status]');
 	task_status.textContent = status_text;
 }
 
-function remove_from_localstorage(id)
-{
-	let tasks = localStorage.getItem('tasks');
-	tasks = JSON.parse(tasks);
-
-	const result = tasks.filter((task) => task.id != id);
-
-	localStorage.setItem('tasks', JSON.stringify(result));
-}
-
-function add_to_localstorage(id, subject, priority, due_date)
-{
-	let tasks = localStorage.getItem('tasks');
-
-	if (tasks == null)
-	{
-		tasks = [];
-	} else {
-		tasks = JSON.parse(tasks);
-	}
-
-	let new_task = structuredClone(new_task_example);
-	new_task.id = id;
-	new_task.subject = subject;
-	new_task.priority = priority;
-	new_task.due_date = due_date;
-
-	tasks.push(new_task);
-
-	localStorage.setItem('tasks', JSON.stringify(tasks));
-}
-
-function update_checkbox_localstorage(id, checkbox_status)
-{
-	let tasks = localStorage.getItem('tasks');
-	tasks = JSON.parse(tasks);
-
-	for (const task of tasks) {
-		if (task.id == id)
-		{
-			task.checked = checkbox_status;
-		}
-	}
-
-	localStorage.setItem('tasks', JSON.stringify(tasks));
-}
-
-function update_priority_localStorage(id, priority)
-{
-	let tasks = localStorage.getItem('tasks');
-	tasks = JSON.parse(tasks);
-
-	for (const task of tasks) {
-		if (task.id == parseInt(id))
-		{
-			task.priority = priority;
-		}
-	}
-
-	localStorage.setItem('tasks', JSON.stringify(tasks));
-}
-
-function update_progress_localstorage(id, new_progress)
-{
-	let tasks = localStorage.getItem('tasks');
-	tasks = JSON.parse(tasks);
-
-	for (const task of tasks) {
-		if (task.id == parseInt(id))
-		{
-			task.progress = new_progress;
-		}
-	}
-
-	localStorage.setItem('tasks', JSON.stringify(tasks));
-}
-
-function update_modified_localstorage(id, modified_text)
-{
-	let tasks = localStorage.getItem('tasks');
-	tasks = JSON.parse(tasks);
-
-	for (const task of tasks) {
-		if (task.id == parseInt(id))
-		{
-			task.modified_date = modified_text;
-		}
-	}
-
-	localStorage.setItem('tasks', JSON.stringify(tasks));
-}
-
-function random_id(){
-	return Math.floor(Math.random() * 99999999);
-}
-
-function render_new_task_items() {
-	let tasks = localStorage.getItem('tasks');
-
-	if (tasks != null) {
-		tasks = JSON.parse(tasks);
-
-		for (const task of tasks) {
-			render_new_task_item(task);
-		}
-	}
-}
-
-function update_visuals_on_check(checkbox, is_checked, tick, subject)
-{
+function render_checkbox_element(checkbox, is_checked, tick, subject) {
 	if (is_checked == true) {
 		tick.classList.add('tick-green');
 		tick.classList.remove('tick-grey');
@@ -289,11 +243,24 @@ function update_visuals_on_check(checkbox, is_checked, tick, subject)
 	}
 }
 
+// updates priority element styles and text
+function render_priority_element(element, priority_id) {
+	element.classList.remove(task_priorities.low.class, task_priorities.normal.class, task_priorities.high.class);
+	element.classList.add(task_priorities[priority_id].class);
+	element.textContent = task_priorities[priority_id].name;
+}
+
+function render_tasks() {
+	for (const task of tasksJSON) {
+		render_task(task);
+	}
+}
+
 // create new task and add it to the list
-function render_new_task_item({ id, subject, priority, due_date, checked, progress, modified_date }) {
+function render_task({ id, subject, priority, due_date, checked, progress, modified_date }) {
 
 	const new_task_item = document.querySelector('#task_item_template').content.firstElementChild.cloneNode(true);
-	
+
 	new_task_item.dataset.id = id;
 
 	// checkbox column
@@ -302,11 +269,11 @@ function render_new_task_item({ id, subject, priority, due_date, checked, progre
 	const subject_cell = row.querySelector('[name=subject]');
 	const tick = row.querySelector('[name=tick]');
 	const subject_el = subject_cell.querySelector('span');
-	let is_checked = checked == null ? checkbox.checked : checked;
-	update_visuals_on_check(checkbox, is_checked, tick, subject_el);
+
+	render_checkbox_element(checkbox, checked, tick, subject_el);
 
 	checkbox.addEventListener('click', e => {
-		update_visuals_on_check(checkbox, checkbox.checked, tick, subject_el);
+		render_checkbox_element(checkbox, checkbox.checked, tick, subject_el);
 
 		update_checkbox_localstorage(row.dataset.id, checkbox.checked);
 
@@ -323,7 +290,7 @@ function render_new_task_item({ id, subject, priority, due_date, checked, progre
 		priority_modal_obj.show();
 		selected_priority_element = task_priority;
 	});
-	update_priority_element(task_priority, priority);
+	render_priority_element(task_priority, priority);
 
 	// date column
 	const task_due_date = new_task_item.querySelector('[name=task_due_date]');
@@ -334,7 +301,7 @@ function render_new_task_item({ id, subject, priority, due_date, checked, progre
 
 	// progress column
 	const progress_cell = new_task_item.querySelector('[name=progress_cell]');
-	update_progress_visual(row, progress_cell, progress);
+	render_progress_element(row, progress_cell, progress);
 	progress_cell.addEventListener('click', e => {
 		progress_modal_obj.show();
 		selected_progress_element = progress_cell;
@@ -347,7 +314,7 @@ function render_new_task_item({ id, subject, priority, due_date, checked, progre
 	const remove_task = new_task_item.querySelector('[name=remove_task]');
 	remove_task.addEventListener('click', e => {
 		const task_row = remove_task.closest('tr');
-		remove_from_localstorage(task_row.dataset.id);
+		remove_task_from_localstorage(task_row.dataset.id);
 		task_row.remove();
 	});
 
@@ -355,12 +322,9 @@ function render_new_task_item({ id, subject, priority, due_date, checked, progre
 	document.querySelector('#task_table tbody').appendChild(new_task_item);
 }
 
-// updates priority element styles and text
-function update_priority_element(element, priority_id) {
-	element.classList.remove(task_priorities.low.class, task_priorities.normal.class, task_priorities.high.class);
-	element.classList.add(task_priorities[priority_id].class);
-	element.textContent = task_priorities[priority_id].name;
-}
+/**
+ * Functions
+ */
 
 // update time when task was last modified
 function update_modified_date(element) {
@@ -378,68 +342,11 @@ function update_modified_date(element) {
 	update_modified_localstorage(row.dataset.id, modified_text);
 }
 
-// create some default tasks
-function preload_data() {
-
-	let tasks = localStorage.getItem('tasks');
-	let should_add = false;
-
-	// if localStorage is empty, add to it
-	if (tasks == null || tasks == "[]")
-	{
-		should_add = true;
-	}
-
-	const data = [
-		{
-			id: random_id(),
-			subject: "Launch new website",
-			priority: "high",
-			due_date: "",
-		},
-		{
-			id: random_id(),
-			subject: "Corporate Rebranding",
-			priority: "low",
-			due_date: "",
-		},
-		{
-			id: random_id(),
-			subject: "Staff Training",
-			priority: "high",
-			due_date: "2018-04-06",
-		},
-		{
-			id: random_id(),
-			subject: "Collateral for Annual Expo",
-			priority: "high",
-			due_date: "2018-04-23",
-		},
-		{
-			id: random_id(),
-			subject: "Expand Marketing Team",
-			priority: "normal",
-			due_date: "2018-04-28",
-		},
-		{
-			id: random_id(),
-			subject: "New Product Launch",
-			priority: "low",
-			due_date: "",
-		},
-	];
-
-	if (should_add == true)
-	{
-		for (const item of data) {
-			add_to_localstorage(item.id, item.subject, item.priority, item.due_date);
-		}
-	}
-
-	render_new_task_items();
-}
-
 // take a number and clamp it between min and max values
 function clamp(number, min, max) {
 	return Math.max(min, Math.min(number, max));
+}
+
+function random_id() {
+	return Math.floor(Math.random() * 99999999);
 }
